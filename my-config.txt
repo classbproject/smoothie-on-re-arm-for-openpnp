@@ -2,12 +2,14 @@
 default_feed_rate                            4000             # Default rate ( mm/minute ) for G1/G2/G3 moves
 default_seek_rate                            4000             # Default rate ( mm/minute ) for G0 moves
 mm_per_arc_segment                           0.5              # Arcs are cut into segments ( lines ), this is the length for these segments.  Smaller values mean more resolution, higher values mean faster computation
-#mm_per_line_segment                          5                # Lines can be cut into segments ( not usefull with cartesian coordinates robots ).
+#mm_per_line_segment                         5                # Lines can be cut into segments ( not usefull with cartesian coordinates robots ).
 
 # Arm solution configuration : Cartesian robot. Translates mm positions into stepper positions
-alpha_steps_per_mm                           80               # Steps per mm for alpha stepper
-beta_steps_per_mm                            80               # Steps per mm for beta stepper
-gamma_steps_per_mm                           1637.7953        # Steps per mm for gamma stepper
+alpha_steps_per_mm                           40               # Steps per mm for alpha stepper
+beta_steps_per_mm                            40               # Steps per mm for beta stepper
+gamma_steps_per_mm                           72.7565          # Steps per mm for gamma stepper
+                                                              # steps/mm = steps per rev / (pi * gear dia)
+                                                              # 3200/(pi*14)
 
 # Planner module configuration : Look-ahead and acceleration configuration
 planner_queue_size                           32               # DO NOT CHANGE THIS UNLESS YOU KNOW EXACTLY WHAT YOUR ARE DOING
@@ -24,24 +26,26 @@ base_stepping_frequency                      100000           # Base frequency f
 # Stepper module pins ( ports, and pin numbers, appending "!" to the number will invert a pin )
 alpha_step_pin                               2.1              # Pin for alpha stepper step signal
 alpha_dir_pin                                0.11             # Pin for alpha stepper direction
-alpha_en_pin                                 0.10            # Pin for alpha enable pin 0.10
+alpha_en_pin                                 0.10             # Pin for alpha enable pin 0.10
 alpha_current                                1.0              # X stepper motor current
 x_axis_max_speed                             30000            # mm/min
 alpha_max_rate                               30000.0          # mm/min actuator max speed
 
-beta_step_pin                                2.2              # Pin for beta stepper step signal
-beta_dir_pin                                 0.20             # Pin for beta stepper direction
-beta_en_pin                                  0.19             # Pin for beta enable
-beta_current                                 1.0              # Y stepper motor current
-y_axis_max_speed                             30000            # mm/min
-beta_max_rate                                30000.0          # mm/min actuator max speed
+# The Y and Z axis pins are swapped since I have two motors running on the Y-axis
 
-gamma_step_pin                               2.3              # Pin for gamma stepper step signal
-gamma_dir_pin                                0.22             # Pin for gamma stepper direction
-gamma_en_pin                                 0.21             # Pin for gamma enable
+beta_step_pin                                2.3              # Pin for beta stepper step signal
+beta_dir_pin                                 0.22             # Pin for beta stepper direction
+beta_en_pin                                  0.21             # Pin for beta enable
+beta_current                                 1.0              # Y stepper motor current
+y_axis_max_speed                             300              # mm/min
+beta_max_rate                                300.0            # mm/min actuator max speed
+
+gamma_step_pin                               2.2              # Pin for gamma stepper step signal
+gamma_dir_pin                                0.20             # Pin for gamma stepper direction
+gamma_en_pin                                 0.19             # Pin for gamma enable
 gamma_current                                1.0              # Z stepper motor current
-z_axis_max_speed                             300              # mm/min
-gamma_max_rate                               300.0            # mm/min actuator max speed
+z_axis_max_speed                             30000            # mm/min
+gamma_max_rate                               30000.0          # mm/min actuator max speed
 
 # Serial communications configuration ( baud rate default to 9600 if undefined )
 uart0.baud_rate                              115200           # Baud rate for the default hardware serial port
@@ -50,15 +54,15 @@ second_usb_serial_enable                     false            # This enables a s
 
 
 # Extruder module configuration
-extruder.hotend.enable                          true             # Whether to activate the extruder module at all. All configuration is ignored if false
+extruder.hotend.enable                          false            # Whether to activate the extruder module at all. All configuration is ignored if false
 extruder.hotend.steps_per_mm                    140              # Steps per mm for extruder stepper
 extruder.hotend.default_feed_rate               600              # Default rate ( mm/minute ) for moves where only the extruder moves
 extruder.hotend.acceleration                    500              # Acceleration for the stepper motor mm/sec²
 extruder.hotend.max_speed                       50               # mm/s
 
 extruder.hotend.step_pin                        2.0              # Pin for extruder step signal
-extruder.hotend.dir_pin                         0.5             # Pin for extruder dir signal
-extruder.hotend.en_pin                          0.4             # Pin for extruder enable signal
+extruder.hotend.dir_pin                         0.5              # Pin for extruder dir signal
+extruder.hotend.en_pin                          0.4              # Pin for extruder enable signal
 
 # extruder offset
 extruder.hotend.x_offset                        0                # x offset from origin in mm
@@ -72,10 +76,9 @@ extruder.hotend.z_offset                        0                # z offset from
 #extruder.hotend.retract_recover_feedrate        8               # recover feedrate in mm/sec (should be less than retract feedrate)
 #extruder.hotend.retract_zlift_length            0               # zlift on retract in mm, 0 disables
 #extruder.hotend.retract_zlift_feedrate          6000            # zlift feedrate in mm/min (Note mm/min NOT mm/sec)
-delta_current                                1.0              # Extruder stepper motor current
 
 # Second extruder module configuration
-extruder.hotend2.enable                          true             # Whether to activate the extruder module at all. All configuration is ignored if false
+extruder.hotend2.enable                          false             # Whether to activate the extruder module at all. All configuration is ignored if false
 extruder.hotend2.steps_per_mm                    140              # Steps per mm for extruder stepper
 extruder.hotend2.default_feed_rate               600              # Default rate ( mm/minute ) for moves where only the extruder moves
 extruder.hotend2.acceleration                    500              # Acceleration for the stepper motor, as of 0.6, arbitrary ratio
@@ -88,9 +91,26 @@ extruder.hotend2.en_pin                          4.29             # Pin for extr
 extruder.hotend2.x_offset                        0                # x offset from origin in mm
 extruder.hotend2.y_offset                        25.0             # y offset from origin in mm
 extruder.hotend2.z_offset                        0                # z offset from origin in mm
-epsilon_current                              1.5              # Second extruder stepper motor current
 
+# Use the extruder drivers for the A and B axes
 
+# A axis
+delta_steps_per_mm                           100              # may be steps per degree for example
+delta_step_pin                               2.0              # Pin for delta stepper step signal
+delta_dir_pin                                0.5              # Pin for delta stepper direction
+delta_en_pin                                 0.4              # Pin for delta enable
+delta_current                                0.3              # Z stepper motor current
+delta_max_rate                               300.0            # mm/min
+delta_acceleration                           500.0            # mm/secÂ²
+
+# B axis
+epsilon_steps_per_mm                          100              # may be steps per degree for example
+epsilon_step_pin                              2.8              # Pin for delta stepper step signal
+epsilon_dir_pin                               2.13             # Pin for delta stepper direction
+epsilon_en_pin                                4.29             # Pin for delta enable
+epsilon_current                               0.3              # Z stepper motor current
+epsilon_max_rate                              300.0            # mm/min
+epsilon_acceleration                          500.0            # mm/secÂ²
 
 # Laser module configuration
 laser_module_enable                          false            # Whether to activate the laser module at all. All configuration is ignored if false.
@@ -99,7 +119,7 @@ laser_module_enable                          false            # Whether to activ
 #laser_module_tickle_power                    0.0              # this duty cycle will be used for travel moves to keep the laser active without actually burning
 
 # Hotend temperature control configuration
-temperature_control.hotend.enable            true             # Whether to activate this ( "hotend" ) module at all. All configuration is ignored if false.
+temperature_control.hotend.enable            false             # Whether to activate this ( "hotend" ) module at all. All configuration is ignored if false.
 temperature_control.hotend.thermistor_pin    0.23             # Pin for the thermistor to read
 temperature_control.hotend.heater_pin        2.5              # Pin that controls the heater
 temperature_control.hotend.thermistor        EPCOS100K        # see http://smoothieware.org/temperaturecontrol#toc5
@@ -116,12 +136,12 @@ temperature_control.hotend.designator        T                #
 #temperature_control.hotend.max_pwm          64               # max pwm, 64 is a good value if driving a 12v resistor with 24v.
 
 # Hotend2 temperature control configuration
-temperature_control.hotend2.enable            true             # Whether to activate this ( "hotend" ) module at all. All configuration is ignored if false.
+temperature_control.hotend2.enable            false             # Whether to activate this ( "hotend" ) module at all. All configuration is ignored if false.
 
 temperature_control.hotend2.thermistor_pin    0.25             # Pin for the thermistor to read
 temperature_control.hotend2.heater_pin        2.4             # Pin that controls the heater
 temperature_control.hotend2.thermistor        EPCOS100K        # see http://smoothieware.org/temperaturecontrol#toc5
-##temperature_control.hotend2.beta             4066             # or set the beta value
+##temperature_control.hotend2.beta            4066             # or set the beta value
 temperature_control.hotend2.set_m_code        104             #
 temperature_control.hotend2.set_and_wait_m_code 109            #
 temperature_control.hotend2.designator        T1               #
@@ -132,7 +152,7 @@ temperature_control.hotend2.designator        T1               #
 
 #temperature_control.hotend2.max_pwm          64               # max pwm, 64 is a good value if driving a 12v resistor with 24v.
 
-temperature_control.bed.enable               true            #
+temperature_control.bed.enable               false            #
 temperature_control.bed.thermistor_pin       0.24             #
 temperature_control.bed.heater_pin           2.7              #
 temperature_control.bed.thermistor           EPCOS100K    # see http://smoothieware.org/temperaturecontrol#toc5
@@ -191,12 +211,12 @@ gamma_min_endstop                            1.29^            #
 #gamma_max_endstop                           1.29^            #
 gamma_homing_direction                       home_to_min      #
 gamma_min                                    0                #
-gamma_max                                    200              #
+gamma_max                                    70               #
 
 # optional enable limit switches, actions will stop if any enabled limit switch is triggered
-#alpha_limit_enable                          false            # set to true to enable X min and max limit switches
-#beta_limit_enable                           false            # set to true to enable Y min and max limit switches
-#gamma_limit_enable                          false            # set to true to enable Z min and max limit switches
+alpha_limit_enable                          false            # set to true to enable X min and max limit switches
+beta_limit_enable                           false            # set to true to enable Y min and max limit switches
+gamma_limit_enable                          false            # set to true to enable Z min and max limit switches
 
 #probe endstop
 #probe_pin                                   1.29             # optional pin for probe
@@ -247,8 +267,8 @@ panel.encoder_a_pin                          3.25!^            # encoder pin
 panel.encoder_b_pin                          3.26!^            # encoder pin
 panel.click_button_pin                       2.11!^            # click button
 panel.a0_pin                                 2.6               # st7565 needs an a0
-panel.contrast                              8                 # override contrast setting (default is 9)
-panel.encoder_resolution                    4                 # override number of clicks to move 1 item (default is 4)
+panel.contrast                               8                 # override contrast setting (default is 9)
+panel.encoder_resolution                     4                 # override number of clicks to move 1 item (default is 4)
 #panel.button_pause_pin                      1.22^             # kill/pause set one of these for the auxilliary button on viki2
 #panel.back_button_pin                       1.22!^            # back button recommended to use this on EXP1
 panel.buzz_pin                               1.30              # pin for buzzer on EXP2
@@ -278,7 +298,7 @@ panel.beta_jog_feedrate                      6000              # y jogging feedr
 panel.gamma_jog_feedrate                     200               # z jogging feedrate in mm/min
 
 panel.hotend_temperature                     185               # temp to set hotend when preheat is selected
-panel.T1_temperature                     185               # temp to set hotend when preheat is selected
+panel.T1_temperature                         185               # temp to set hotend when preheat is selected
 panel.bed_temperature                        60                # temp to set bed when preheat is selected
 
 # Example of a custom menu entry, which will show up in the Custom entry.
